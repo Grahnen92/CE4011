@@ -49,11 +49,15 @@ Parallel (Multiple Threads) APSP on CPU.
 void MT_APSP(int *mat, const size_t N)
 {
 	MPI_Init(&argc, &argv);
+
+	//broadcast N
+
 	for (int k = 0; k < N; k++)
 	{
-		
+		//broadcast matrix
+		//broadcast k
 		functionName(int *m);
-		
+		//collect matrix
 	}
 	MPI_Finalize();
 }
