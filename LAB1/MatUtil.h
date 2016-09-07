@@ -30,4 +30,6 @@ bool CmpArray(const int *l, const int *r, const size_t eleNum);
 // const int N - the number of vertices.
 void ST_APSP(int *mat, const size_t N);
 
+void MT_APSP(int *mat, const size_t N);
+
 #endif
