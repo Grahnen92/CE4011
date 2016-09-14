@@ -3,6 +3,9 @@
 
 #include "MatUtil.h"
 
+//mpicc -std=c99 -o APSPtest.c MathUtil.h MathUtil.c
+//qsub -pe mpich 4 mysge.sh
+
 int main(int argc, char **argv)
 {
 	MPI_Init(&argc, &argv);
