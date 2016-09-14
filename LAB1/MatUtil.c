@@ -48,39 +48,50 @@ Parallel (Multiple Threads) APSP on CPU.
 void MT_APSP(int *mat, const size_t N)
 {
 	
-	
 	int rank;
 	int n;
-	int *buf;//int buf[N];
+	
 	const int root = 0;
+	int tmp_k;
 
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
 	if(rank == root)
 	{
-		buf = mat;
 		n = N;
+		printMat(mat, n);
 	}
-		
+			
 	//broadcast N
-	MPI_Bcast (n, 1, MPI_INT, root, MPI_COMM_WORLD);
+	MPI_Bcast (&n, 1, MPI_INT, root, MPI_COMM_WORLD);
+	printf("rank = %d n = %d\n", rank, n);
+	int *tmp_buf;
+	tmp_buf = malloc(n*n*sizeof(int));
 	
-
+	
 	for (int k = 0; k < N; k++)
 	{
-		//broadcast k
-		MPI_Bcast (k, 1, MPI_INT, root, MPI_COMM_WORLD);
-		
 		if(rank == root)
-			buf = mat;
-		//broadcast matrix
-		MPI_Bcast (&buf, n, MPI_INT, root, MPI_COMM_WORLD);
+		{
+			tmp_k = k;
+			for(int i = 0; i < n*n; i++)
+				tmp_buf[i] = mat[i];
+		}
 		
-		//do calculations for this k
-		functionName(buf, n, k );
+		//printf("Rank %d broadcasting current k %d...\n", rank, k);
+		//MPI_Bcast (&tmp_k, 1, MPI_INT, root, MPI_COMM_WORLD);
 		
-		//collect matrices with reduce
-		MPI_Reduce(&buf, &mat, n, MPI_INT, MPI_MIN, root, MPI_COMM_WORLD);
+		printf("Rank %d broadcasting current matrix...\n", rank);
+		MPI_Bcast (tmp_buf, n*n, MPI_INT, root, MPI_COMM_WORLD);
+		
+		
+		
+		printf("Rank %d calculating current matrix...\n", rank);
+		functionName(tmp_buf, n, k );
+
+		printf("Rank %d collecting data with reduce...\n", rank);
+		MPI_Reduce(tmp_buf, mat, n*n, MPI_INT, MPI_MIN, root, MPI_COMM_WORLD);
+		if(rank == 0)
+			printMat(mat, n);
 	    
 	}
 	
@@ -88,14 +99,15 @@ void MT_APSP(int *mat, const size_t N)
 
 void functionName(int *mat, const int N, const int K)
 {
-
+	
 	int rank, numprocs;
-
+	
 	MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
+	
 	int lb = (N / numprocs)*rank;
 	int ub = (N / numprocs)*(rank+1);
+	printf("rank = %d K = %d N = %d lb = %d ub = %d \n", rank, K, N, lb, ub);
 	
 	for (int i = lb; i < ub; i++)
 	{
@@ -112,6 +124,23 @@ void functionName(int *mat, const int N, const int K)
 			}
 		}
 	}
+	
+}
+
+void printMat(int *mat, const int N)
+{
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	printf("salut rank = %d!\n", rank);
+	for(int i = 0; i < N; i++)
+	{
+		for(int j = 0; j < N; j++)
+		{
+			printf(" %d", mat[i*N + j]);
+		}
+		printf("\n");
+	}
+	printf("Au revoir!\n");	
 }
 
 
