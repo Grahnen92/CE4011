@@ -5,6 +5,8 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include <mpi.h>
+
 /// Generate a random matrix.
 //
 // Parameters:

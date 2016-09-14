@@ -1,5 +1,4 @@
 #include "MatUtil.h"
-#include <mpi.h>
 
 void GenMatrix(int *mat, const size_t N)
 {
@@ -48,21 +47,46 @@ Parallel (Multiple Threads) APSP on CPU.
 */
 void MT_APSP(int *mat, const size_t N)
 {
-	MPI_Init(&argc, &argv);
+	
+	
+	int rank;
+	int n;
+	int *buf;//int buf[N];
+	const int root = 0;
 
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	if(rank == root)
+	{
+		buf = mat;
+		n = N;
+	}
+		
 	//broadcast N
+	MPI_Bcast (n, 1, MPI_INT, root, MPI_COMM_WORLD);
+	
 
 	for (int k = 0; k < N; k++)
 	{
-		//broadcast matrix
 		//broadcast k
-		functionName(int *m);
-		//collect matrix
+		MPI_Bcast (k, 1, MPI_INT, root, MPI_COMM_WORLD);
+		
+		if(rank == root)
+			buf = mat;
+		//broadcast matrix
+		MPI_Bcast (&buf, n, MPI_INT, root, MPI_COMM_WORLD);
+		
+		//do calculations for this k
+		functionName(buf, n, k );
+		
+		//collect matrices with reduce
+		MPI_Reduce(&buf, &mat, n, MPI_INT, MPI_MIN, root, MPI_COMM_WORLD);
+	    
 	}
-	MPI_Finalize();
+	
 }
 
-void functionName(int *mat, const size_t N, const size_t K)
+void functionName(int *mat, const int N, const int K)
 {
 
 	int rank, numprocs;
@@ -78,8 +102,8 @@ void functionName(int *mat, const size_t N, const size_t K)
 		for (int j = 0; j < N; j++)
 		{
 			int i0 = i*N + j;
-			int i1 = i*N + k;
-			int i2 = k*N + j;
+			int i1 = i*N + K;
+			int i2 = K*N + j;
 			if (mat[i1] != -1 && mat[i2] != -1)
 			{
 				int sum = (mat[i1] + mat[i2]);
