@@ -47,7 +47,8 @@ int main(int argc, char **argv)
 	//replace by parallel algorithm
 	
 	gettimeofday(&tv1, NULL);
-	MT_APSP(result, N);
+	// MT_APSP(result, N); //matrix
+	MT_SM_APSP(result, N); //row
 	gettimeofday(&tv2, NULL);
 	if(rank == 0)
 	{
